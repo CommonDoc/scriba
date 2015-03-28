@@ -9,7 +9,6 @@
            :tag-attributes
            :tag-body
            :tag
-           :block-tag
            :text-node
            :general-node
            :document
@@ -60,7 +59,7 @@
                             general-string)
   (:destructure (key ws1 eq ws2 value)
     (declare (ignore ws1 eq ws2))
-    (list key value)))
+    (cons key value)))
 
 (defrule tag-attributes (and #\[
                              (? tag-attribute)
@@ -81,32 +80,25 @@
     (declare (ignore open-paren close-paren))
     body))
 
-(defrule tag (and tag-name (? tag-attributes) tag-body)
-  (:destructure (name attributes body)
-    (list :name name
-          :attrs attributes
-          :body body)))
+(defrule tag (and (? (and tag-name (? tag-attributes))) tag-body)
+  (:destructure (header body)
+    (if header
+        (destructuring-bind (name attributes) header
+          (list :name name
+                :attrs attributes
+                :body body))
+        (list :name "div"
+              :attrs nil
+              :body body))))
 
-(defrule block-tag (and "@begin" (? tag-attributes) tag-body
-                        (* general-node)
-                        "@end" tag-body)
-  (:destructure (start attributes start-name body end end-name)
-    (declare (ignore start end))
-    (let ((start-tag-name (first start-name))
-          (end-tag-name (first end-name)))
-      (assert (equal start-tag-name end-tag-name))
-      (list :name start-tag-name
-            :attrs attributes
-            :body body))))
-
-(defrule text-node (+ (not (or #\@ #\))))
+(defrule text-node (+ (not (or #\@ #\( #\))))
   (:lambda (text)
     (text text)))
 
 (defrule at-sign-node (and #\@)
   (:constant "@"))
 
-(defrule general-node (or block-tag tag text-node at-sign-node))
+(defrule general-node (or tag text-node at-sign-node))
 
 (defrule document (+ general-node)
   (:lambda (nodes)
