@@ -20,7 +20,9 @@
          (let ((stack (list (list)))
                (contexts (list)))
            (flet ((push-to-stack (elem)
-                    (push elem (first stack))))
+                    (setf (first stack)
+                          (append (first stack)
+                                  (list elem)))))
              (loop for elem in ast do
                (cond
                  ((stringp elem)
@@ -40,7 +42,7 @@
                        (push-to-stack
                         (list :name (getf current :name)
                               :attrs (getf current :attrs)
-                              :body (reverse stack-frame)))))
+                              :body stack-frame))))
                     (t
                      (push-to-stack elem)))))))
            (first stack))))))
