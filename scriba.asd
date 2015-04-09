@@ -3,9 +3,9 @@
   :maintainer "Fernando Borretti <eudoxiahp@gmail.com>"
   :license "MIT"
   :version "0.1"
-  :homepage ""
-  :bug-tracker ""
-  :source-control (:git "")
+  :homepage "https://github.com/CommonDoc/scriba"
+  :bug-tracker "https://github.com/CommonDoc/scriba/issues"
+  :source-control (:git "git@github.com:CommonDoc/scriba.git")
   :depends-on (:common-doc-plump
                :plump-sexp
                :esrap)
