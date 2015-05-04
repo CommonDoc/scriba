@@ -9,9 +9,16 @@
   (:documentation "The main CommonDoc interface."))
 (in-package :scriba)
 
+(defun plump-to-text (plump-node stream)
+  (if (typep plump-node 'plump:text-node)
+      (write-string (plump:text plump-node) stream)
+      (loop for child across (plump:children plump-node) do
+        (plump-to-text child stream))))
+
 (defun string-to-common-doc (string)
-  (common-doc-plump.parser:parse-document
-   (scriba.plump:parse string)))
+  (let ((common-doc-plump.parser:*serializer* #'plump-to-text))
+    (common-doc-plump.parser:parse-document
+     (scriba.plump:parse string))))
 
 (defclass scriba (document-format)
   ()

@@ -1,7 +1,8 @@
 (in-package :cl-user)
 (defpackage scriba.emitter
   (:use :cl :common-doc)
-  (:export :emit)
+  (:export :emit
+           :emit-to-string)
   (:documentation "Dump CommonDoc nodes to Scriba text."))
 (in-package :scriba.emitter)
 
@@ -169,3 +170,7 @@
   (with-tag (nil stream :name "title")
     (write-string (title doc) stream))
   (emit-children doc stream))
+
+(defun emit-to-string (node-or-doc)
+  (with-output-to-string (stream)
+    (emit node-or-doc stream)))
