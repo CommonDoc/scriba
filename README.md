@@ -1,4 +1,6 @@
-# scriba
+# Scriba
+
+[![Build Status](https://travis-ci.org/CommonDoc/scriba.svg?branch=master)](https://travis-ci.org/CommonDoc/scriba)
 
 A markup format similar to [Scribe](http://en.wikipedia.org/wiki/Scribe_%28markup_language%29).
 
