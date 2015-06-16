@@ -9,12 +9,14 @@
 ;;; Utilities
 
 (defmacro with-tag-name ((name stream) &body body)
+  "Emit a tag name."
   `(progn
      (write-char #\@ ,stream)
      (write-string ,name ,stream)
      ,@body))
 
 (defun emit-hash-table (hash-table stream)
+  "Emit a hash table."
   (flet ((string-needs-quoting-p (string)
            (if (position #\" string) t)))
     (when (> (hash-table-count hash-table) 0)
@@ -30,6 +32,7 @@
       (write-char #\] stream))))
 
 (defmacro with-tag-attrs ((attrs stream &key extra) &body body)
+  "Emit tag attributes."
   (let ((hash-name (gensym)))
     `(let ((,hash-name (if ,attrs
                            (alexandria:copy-hash-table ,attrs)
@@ -41,12 +44,14 @@
        ,@body)))
 
 (defmacro with-tag-body ((stream) &body body)
+  "Emit a tag body."
   `(progn
      (write-char #\( ,stream)
      ,@body
      (write-char #\) ,stream)))
 
 (defmacro with-tag ((node stream &key name extra-attrs) &body body)
+  "Emit a whole tag."
   (let ((name (if name
                   name
                   `(find-tag (class-of ,node)))))
@@ -56,6 +61,7 @@
            ,@body)))))
 
 (defmacro with-block-tag ((node stream &key name extra-attrs) &body body)
+  "Emit a block tag."
   (let ((name (if name
                   name
                   `(find-tag (class-of ,node)))))
