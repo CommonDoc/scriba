@@ -5,6 +5,8 @@
   (:documentation "Parse the Scriba AST into Plump nodes."))
 (in-package :scriba.plump)
 
+(defvar *strip* nil)
+
 (defun transform-blocks (ast)
   "Take pairs of @begin/@end blocks and turn the into single blocks."
   (if (stringp ast)
@@ -26,15 +28,22 @@
              (loop for elem in ast do
                (cond
                  ((stringp elem)
-                  (push-to-stack elem))
+                  (push-to-stack (if *strip*
+                                     (prog1
+                                         (string-left-trim '(#\Newline)
+                                                           elem)
+                                       (setf *strip* nil))
+                                     elem)))
                  ((eq (first elem) :name)
                   (cond
                     ((equal (getf elem :name) "begin")
+                     (setf *strip* t)
                      (push (list :name (first (getf elem :body))
                                  :attrs (getf elem :attrs))
                            contexts)
                      (push (list) stack))
                     ((equal (getf elem :name) "end")
+                     (setf *strip* nil)
                      (let ((current (pop contexts))
                            (stack-frame (pop stack)))
                        (assert (equal (getf current :name)
@@ -55,20 +64,24 @@
         (:document
          (ast-to-plump-sexp (cons "scriba-root-node" (rest ast))))
         (:name
-         (if (equal (getf ast :name) "div")
-             (append (list (list "div"))
-                     (list "(")
-                     (ast-to-plump-sexp (getf ast :body))
-                     (list ")"))
-             (append
-              (list (cons (getf ast :name)
-                          (loop for (key . val) in (getf ast :attrs) appending
-                            (list (intern key (find-package :keyword))
-                                  val))))
-              (ast-to-plump-sexp (getf ast :body)))))
+         (cond
+           ((equal (getf ast :name) "div")
+            (append (list (list "div"))
+                    (list "(")
+                    (ast-to-plump-sexp (getf ast :body))
+                    (list ")")))
+           (t
+            (append
+             (list (cons (getf ast :name)
+                         (loop for (key . val) in (getf ast :attrs) appending
+                           (list (intern key (find-package :keyword))
+                                 val))))
+             (ast-to-plump-sexp (getf ast :body))))))
         (t
          (loop for elem in ast collecting
            (ast-to-plump-sexp elem))))))
+
+;;; Interface
 
 (defun parse (string)
   "Parse a string of Scriba text into a Plump node."
