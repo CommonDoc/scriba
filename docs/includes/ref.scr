@@ -1,0 +1,8 @@
+@begin[ref=data-table-3](table)
+@row(@cell(@b(A)) @cell(@b(B)) @cell(@b(C)))
+@row(@cell(1.23) @cell(3.14) @cell(4.5))
+@end(table)
+
+...
+
+See the third @ref[id=data-table-3](table) for the data.

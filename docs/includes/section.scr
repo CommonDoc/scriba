@@ -1,0 +1,19 @@
+@begin(section)
+@title(Section)
+
+  @begin(section)
+  @title(Subsection)
+
+    @begin(section)
+    @title(Sub-subsection)
+
+    @end(section)
+
+  @end(section)
+
+  @begin[ref=section-id](section)
+  @title(Another subsection)
+
+  @end(section)
+
+@end(section)

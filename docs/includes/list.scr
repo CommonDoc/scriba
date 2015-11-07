@@ -1,0 +1,4 @@
+@begin(list)
+@item(An item.)
+@item(In @i(a) list.)
+@end(list)
