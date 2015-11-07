@@ -3,6 +3,7 @@
   :license "MIT"
   :depends-on (:scriba
                :fiveam)
+  :description "Tests for Scriba."
   :components ((:module "t"
                 :serial t
                 :components
