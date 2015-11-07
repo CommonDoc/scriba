@@ -1,0 +1,339 @@
+@begin(section)
+@title(Overview)
+
+Scriba is a markup format with a syntax similar to that of
+@link[uri=https://en.wikipedia.org/wiki/Scribe_(markup_language)](Scribe).
+
+@end(section)
+
+@begin(section)
+@title(Reference)
+
+Below is the complete reference to the Scriba format.
+
+@begin(section)
+@title(Basics)
+
+@image[src=tag.png]()
+
+This is a begin/end block:
+
+@code[lang=scribe](@include[path=includes/begin-end.scr]())
+
+Paragraphs don't have to be explicitly marked up, they are automatically
+determined by two newlines. That is, the following:
+
+@begin[lang=scribe](code)
+This is a paragraph
+
+This is @i(another paragraph).
+@end(code)
+
+Will produce:
+
+@begin(quote)
+This is a paragraph
+
+This is @i(another paragraph).
+@end(quote)
+
+@end(section)
+
+@begin(section)
+@title(Formatting)
+
+The following tags provide basic formatting:
+
+@begin(deflist)
+@term(@c(@verb(@b)))
+@def(Bold text.)
+
+@term(@c(@verb(@i)))
+@def(Italicized text.)
+
+@term(@c(@verb(@u)))
+@def(Underlined text.)
+
+@term(@c(@verb(@strike)))
+@def(Striked-out text.)
+
+@term(@c(@verb(@c)))
+@def(Inline code.)
+
+@term(@c(@verb(@sup)))
+@def(Superscripted text.)
+
+@term(@c(@verb(@sub)))
+@def(Subscripted text.)
+@end(deflist)
+
+@end(section)
+
+For instance, the following:
+
+@code[lang=scribe](@include[path=includes/formatting.scr]())
+
+Will produce the following:
+
+@begin(quote)
+This text is @b(bold), this is @i(italics), and this is @c(code). You might also
+want @u(underlined) text.
+
+The speed of light is 3x10@sup(8) meters per second. The symbol for the
+permittivity of vacuum is ε@sub(0).
+@end(quote)
+
+@begin(section)
+@title(Sections)
+
+Unlike HTML and Markdown, where sections are implicit in the positions of
+headings, CommonDoc (and, thus, Scriba) makes sections explicit blocks.
+
+@code[lang=scribe](@include[path=includes/section.scr]())
+
+The indentation above is optional, normally, section tags are flat.
+
+@end(section)
+
+@begin(section)
+@title(Lists)
+
+Scriba provides three types of lists: unordered, enumerated, and definition
+lists.
+
+@begin(section)
+@title(Unordered)
+
+Unordered lists can be created with the @c(@verb(@list)) tag. Individual list
+items go in @c(@verb(@item)) tags.
+
+@code[lang=scribe](@include[path=includes/list.scr]())
+
+This will produce the following:
+
+@begin(quote)
+@begin(list)
+@item(An item.)
+@item(In @i(a) list.)
+@end(list)
+@end(quote)
+
+@end(section)
+
+@begin(section)
+@title(Enumerated)
+
+Enumerated lists can be created with the @c(@verb(@enum)) tag. As in unordered
+lists, list items use @c(@verb(@item)) tags.
+
+@code[lang=scribe](@include[path=includes/enum.scr]())
+
+Will produce this:
+
+@begin(quote)
+@begin(enum)
+@item(The first item.)
+@item(The second item.)
+@item(Third.)
+@end(enum)
+@end(quote)
+
+@end(section)
+
+@begin(section)
+@title(Definition)
+
+Definition lists can be created with the @c(@verb(@deflist)) tag. Inside the tag
+there are alternating @c(@verb(@term)) and @c(@verb(@def)) tags. For instance,
+the markup below:
+
+@code[lang=scribe](@include[path=includes/def.scr]())
+
+Will produce this:
+
+@begin(quote)
+@begin(deflist)
+
+@term(VerTeX)
+@def(A markup language with text syntax.)
+
+@term(Scriba)
+@begin(def)
+A markup language with Scribe syntax.
+
+As you can see, you can use regular tags and begin/end ones interchangeably.
+@end(def)
+
+@end(deflist)
+@end(quote)
+
+@end(section)
+
+@end(section)
+
+@begin(section)
+@title(Code)
+
+The @c(lang) attribute is a string identifying the language of the code. No
+restrictions are placed on this value.
+
+The following markup:
+
+@code[lang=scribe](@include[path=includes/code.scr]())
+
+Will produce:
+
+@begin(quote)
+@begin[lang=lisp](code)
+(defun fact (n)
+  (if (= n 1)
+      1
+      (* n (fact (1- n)))))
+@end(code)
+@end(quote)
+
+You can also use the
+@link[uri="http://commondoc.github.io/docs/extensions.html#include-files"](include
+contrib) to include code from a file, or a subrange within a file.
+
+@end(section)
+
+@begin(section)
+@title(Links)
+
+@begin(section)
+@title(Internal)
+
+The following markup:
+
+@code[lang=scribe](@include[path=includes/ref.scr]())
+
+Will produce the following table and link:
+
+@begin(quote)
+@begin[ref=data-table-3](table)
+@row(@cell(@b(A)) @cell(@b(B)) @cell(@b(C)))
+@row(@cell(1.23) @cell(3.14) @cell(4.5))
+@end(table)
+
+...
+
+See the third @ref[id=data-table-3](table) for the data.
+@end(quote)
+
+You can also link to nodes inside other documents, where a document is
+identified by a string:
+
+@code[lang=scribe](@include[path=includes/ref-doc.scr]())
+
+
+@end(section)
+
+@begin(section)
+@title(External)
+
+You can link to external URLs using the @c(@verb(@link)) tag. This:
+
+@code[lang=scribe](@include[path=includes/link.scr]())
+
+Will produce:
+
+@begin(quote)
+Visit @link[uri="https://www.google.com/"](Google).
+@end(quote)
+
+@end(section)
+
+@end(section)
+
+@begin(section)
+@title(Images & Figures)
+
+You can link to images in the filesystem relative to the document:
+
+@code[lang=scribe](@include[path=includes/image.scr]())
+
+Or to images on the web. For instance, a Travis build status badge:
+
+@code[lang=scribe](@include[path=includes/image-ext.scr]())
+
+will produce:
+
+@begin(quote)
+@image[src="https://travis-ci.org/eudoxia0/crane.svg?branch=master"]()
+@end(quote)
+
+@end(section)
+
+@begin(section)
+@title(Tables)
+
+@code[lang=scribe](@include[path=includes/table.scr]())
+
+Produces the following:
+
+@begin(quote)
+@begin(table)
+  @begin(row)
+    @cell()
+    @cell(@b(Peach))
+    @cell(@b(Egg))
+  @end(row)
+  @begin(row)
+    @cell(@i(Fat))
+    @cell(0.25g)
+    @cell(10.6g)
+  @end(row)
+  @begin(row)
+    @cell(@i(Protein))
+    @cell(0.91g)
+    @cell(12.6g)
+  @end(row)
+@end(table)
+@end(quote)
+
+Note that the indentation in this example is completely optional.
+
+@end(section)
+
+@end(section)
+
+@begin(section)
+@title(Emacs Mode)
+
+The Scriba repository contains a file, @c(scriba.el), which implements an Emacs
+mode for @c(.scr) files. The following commands are defined:
+
+@begin(deflist)
+@term(@c(Tab))
+@def(Insert an at sign.)
+
+@term(@c(C-c C-c b))
+@def(Prompts for a tag name and inserts the begin/end block with that name.)
+
+@term(@c(C-c C-c s))
+@def(Prompts for a title and inserts the section block.)
+
+@term(@c(C-c C-s b))
+@def(Inserts bold markup around the selection.)
+
+@term(@c(C-c C-s i))
+@def(Inserts italic markup around the selection.)
+
+@term(@c(C-c C-s u))
+@def(Inserts underline markup around the selection.)
+
+@term(@c(C-c C-s s))
+@def(Inserts strikethrough markup around the selection.)
+
+@term(@c(C-c C-s c))
+@def(Inserts code markup around the selection.)
+
+@term(@c(C-c C-s ^))
+@def(Inserts superscript markup around the selection.)
+
+@term(@c(C-c C-s v))
+@def(Inserts subscript markup around the selection.)
+@end(deflist)
+
+@end(section)
