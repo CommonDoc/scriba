@@ -69,8 +69,10 @@
        (with-tag-name ("begin" ,stream)
          (with-tag-attrs ((if ,node (metadata ,node) nil) ,stream :extra ,extra-attrs)
            (with-tag-body (,stream)
-             (write-string ,name ,stream))))
+             (write-string ,name ,stream)))
+         (write-char #\Newline ,stream))
        ,@body
+       (format ,stream "~&")
        (with-tag-name ("end" ,stream)
          (with-tag-body (,stream)
            (write-string ,name ,stream))))))
@@ -128,11 +130,13 @@
 
 (defmethod emit ((node list-item) stream)
   (with-tag (node stream)
-    (emit-children node stream)))
+    (emit-children node stream))
+  (write-char #\Newline stream))
 
 (defmethod emit ((node definition) stream)
   (with-tag (nil stream :name "term")
     (emit-list (term node) stream))
+  (write-char #\Newline stream)
   (with-tag (nil stream :name "def")
     (emit-list (definition node) stream)))
 
@@ -170,12 +174,17 @@
   (with-block-tag (node stream)
     (with-tag (nil stream :name "title")
       (emit-list (title node) stream))
+    (write-char #\Newline stream)
+    (write-char #\Newline stream)
     (emit-children node stream)))
 
 (defmethod emit ((doc document) stream)
   (with-tag (nil stream :name "title")
     (write-string (title doc) stream))
-  (emit-children doc stream))
+  (write-char #\Newline stream)
+  (write-char #\Newline stream)
+  (emit-children doc stream)
+  (write-char #\Newline stream))
 
 (defun emit-to-string (node-or-doc)
   (with-output-to-string (stream)
