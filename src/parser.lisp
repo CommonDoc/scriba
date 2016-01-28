@@ -21,9 +21,6 @@
 (defrule whitespace (+ (or #\Space #\Tab #\Newline))
   (:constant nil))
 
-(defun not-doublequote (char)
-  (not (eql #\" char)))
-
 (defrule escape-string (and #\\ #\")
   (:constant "\\\""))
 
@@ -33,16 +30,14 @@
 
 ;; a, abc, ab123
 (defrule unquoted-string (+ attribute-name-char)
-  (:lambda (text)
-    (text text)))
+  (:text t))
 
-(defrule string-char (or escape-string (not-doublequote character)))
+(defrule string-char (or escape-string (not #\")))
 
 ;; "Hello, \"world\"!"
 (defrule quoted-string (and #\" (* string-char) #\")
-  (:destructure (open-quote text close-quote)
-    (declare (ignore open-quote close-quote))
-    (text text)))
+  (:function second)
+  (:text t))
 
 ;; a, ab, "123", "Hello, \"world\"!"
 (defrule general-string (or quoted-string unquoted-string))
@@ -50,9 +45,8 @@
 ;;; Tags
 
 (defrule tag-name (and #\@ (+ (not (or whitespace #\[ #\())))
-  (:destructure (at-sign text)
-    (declare (ignore at-sign))
-    (text text)))
+  (:function second)
+  (:text t))
 
 (defrule tag-attribute (and unquoted-string
                             (? whitespace) #\= (? whitespace)
@@ -67,33 +61,26 @@
                              #\])
   (:destructure (open-bracket first-attr attributes close-bracket)
     (declare (ignore open-bracket close-bracket))
-    (if attributes
-        (cons first-attr (loop for attr in attributes
-                           collecting (second attr)))
-        (if first-attr
-            (list first-attr)))))
+    (cond
+      (attributes
+       (cons first-attr (loop for attr in attributes
+                           collecting (second attr))))
+      (first-attr
+       (list first-attr)))))
 
 (defrule tag-body (and #\(
                        (* general-node)
                        #\))
-  (:destructure (open-paren body close-paren)
-    (declare (ignore open-paren close-paren))
-    body))
+  (:function second))
 
 (defrule tag (and (? (and tag-name (? tag-attributes))) tag-body)
-  (:destructure (header body)
-    (if header
-        (destructuring-bind (name attributes) header
-          (list :name name
-                :attrs attributes
-                :body body))
-        (list :name "div"
-              :attrs nil
-              :body body))))
+  (:destructure ((&optional (name "div") attributes) body)
+    (list :name name
+          :attrs attributes
+          :body body)))
 
 (defrule text-node (+ (not (or #\@ #\( #\))))
-  (:lambda (text)
-    (text text)))
+  (:text t))
 
 (defrule at-sign-node (and #\@)
   (:constant "@"))
