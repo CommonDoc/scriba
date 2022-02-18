@@ -15,20 +15,25 @@
      (write-string ,name ,stream)
      ,@body))
 
-(defun emit-hash-table (hash-table stream)
+(defun emit-hash-table (hash-table stream &optional (delimiter #\Space))
   "Emit a hash table."
   (flet ((string-needs-quoting-p (string)
-           (if (position #\" string) t)))
+           (when (or (position #\" string)
+                     (position delimiter string))
+             t)))
     (when (> (hash-table-count hash-table) 0)
       (write-char #\[ stream)
       (loop for attr-name being the hash-keys of hash-table
             for attr-value being the hash-values of hash-table
-            do
-               (write-string attr-name stream)
+            for idx downfrom (1- (hash-table-count hash-table))
+            for last-item = (zerop idx)
+            do (write-string attr-name stream)
                (write-char #\= stream)
                (if (string-needs-quoting-p attr-value)
-                   (print attr-value stream)
-                   (princ attr-value stream)))
+                   (prin1 attr-value stream)
+                   (princ attr-value stream))
+            unless last-item
+              do (write-char delimiter stream))
       (write-char #\] stream))))
 
 (defmacro with-tag-attrs ((attrs stream &key extra) &body body)
@@ -124,9 +129,19 @@
   (with-block-tag (node stream)
     (emit-children node stream)))
 
-(defmethod emit ((node document-link) stream))
+(defmethod emit ((node document-link) stream)
+  (with-tag (node stream
+             ;; COMMON-DOC-PLUMP.PARSER:PARSE function does not
+             ;; put into the metadata ID attribute.
+             ;; That is why we need to pass id as an extra argument:
+             :extra-attrs (list (cons "id"
+                                      (node-reference
+                                       node))))
+    (emit-children node stream)))
 
-(defmethod emit ((node web-link) stream))
+(defmethod emit ((node web-link) stream)
+  (with-tag (node stream)
+    (emit-children node stream)))
 
 (defmethod emit ((node list-item) stream)
   (with-tag (node stream)

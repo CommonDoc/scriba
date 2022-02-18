@@ -16,6 +16,10 @@ Below is the complete reference to the Scriba format.
 
 @image[src=tag.png]()
 
+Attribute/value pairs should be separated by white space.
+If the value contains white space, then it should be surrounded
+by double quotes.
+
 This is a begin/end block:
 
 @code[lang=scribe](@include[path=includes/begin-end.scr]())
