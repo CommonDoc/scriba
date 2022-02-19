@@ -86,3 +86,30 @@ test
 test
 
 @end(section)"))
+
+(test web-link-1
+  (emit-identity "Visit @link[uri=https://www.google.com/](Google)."))
+
+(test web-link-2
+  (parse-equal "Visit @link[uri=\"https://www.google.com/\"](Google)."
+               ;; Note, emitter outputs uri without double quotes:
+               "Visit @link[uri=https://www.google.com/](Google)."))
+
+(test ref-link-1
+  (emit-identity "See the third @ref[id=data-table-3](table) for the data."))
+
+(test ref-link-2
+  (parse-equal "See the third @ref[id=\"data-table-3\"](table) for the data."
+               ;; Note, emitter outputs uri without double quotes:
+               "See the third @ref[id=data-table-3](table) for the data."))
+
+(test ref-link-3
+  (emit-identity "See the third @ref[doc=foo-bar,id=data-table-3](table) for the data."))
+
+(test ref-link-4
+  (parse-equal "See the third @ref[doc=foo-bar id=\"data-table-3\"](table) for the data."
+               ;; Note, emitter removes a space between attributes
+               "See the third @ref[doc=foo-bar id=data-table-3](table) for the data."))
+
+(test ref-link-5
+  (emit-identity "See the third @ref[id=\"foo-bar doc=data-table-3\"](table) for the data."))
