@@ -42,6 +42,24 @@
   (test-equal "@begin(a)@begin(b)test@end(b)@begin(c)text@end(c)@end(a)"
               "<a><b>test</b><c>text</c></a>"))
 
+(test nested-lists-
+  (test-equal "@begin(list)
+  @item(First item)
+  @item(Second item
+
+        @begin(list)
+          @item(Item of a nested list)
+        @end(list)
+  )
+@end(list)"
+              "<list>  <item>First item</item>
+  <item>Second item
+
+        <list>          <item>Item of a nested list</item>
+        </list>
+  </item>
+</list>"))
+
 (test attributes
   (test-equal "@node[attr=val]()"
               "<node attr=\"val\"/>"))

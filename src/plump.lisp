@@ -7,6 +7,47 @@
 
 (defvar *strip* nil)
 
+(defun transform-multiple-blocks (ast)
+  (let ((stack (list (list)))
+        (contexts (list)))
+    (flet ((push-to-stack (elem)
+             (setf (first stack)
+                   (append (first stack)
+                           (list elem)))))
+      (loop for elem in ast do
+        (cond
+          ((stringp elem)
+           (push-to-stack (if *strip*
+                              (prog1
+                                  (string-left-trim '(#\Newline)
+                                                    elem)
+                                (setf *strip* nil))
+                              elem)))
+          ((eq (first elem) :name)
+           (cond
+             ((equal (getf elem :name) "begin")
+              (setf *strip* t)
+              (push (list :name (first (getf elem :body))
+                          :attrs (getf elem :attrs))
+                    contexts)
+              (push (list) stack))
+             ((equal (getf elem :name) "end")
+              (setf *strip* nil)
+              (let ((current (pop contexts))
+                    (stack-frame (pop stack)))
+                (assert (equal (getf current :name)
+                               (first (getf elem :body))))
+                (push-to-stack
+                 (list :name (getf current :name)
+                       :attrs (getf current :attrs)
+                       :body stack-frame))))
+             (t
+              (push-to-stack
+               ;; Here we are applying TRANSFORM-BLOCKS
+               ;; to process nested @begin/@end blocks:
+               (transform-blocks elem))))))))
+    (first stack)))
+
 (defun transform-blocks (ast)
   "Take pairs of @begin/@end blocks and turn the into single blocks."
   (if (stringp ast)
@@ -19,42 +60,7 @@
                :attrs (getf ast :attrs)
                :body (transform-blocks (getf ast :body))))
         (t
-         (let ((stack (list (list)))
-               (contexts (list)))
-           (flet ((push-to-stack (elem)
-                    (setf (first stack)
-                          (append (first stack)
-                                  (list elem)))))
-             (loop for elem in ast do
-               (cond
-                 ((stringp elem)
-                  (push-to-stack (if *strip*
-                                     (prog1
-                                         (string-left-trim '(#\Newline)
-                                                           elem)
-                                       (setf *strip* nil))
-                                     elem)))
-                 ((eq (first elem) :name)
-                  (cond
-                    ((equal (getf elem :name) "begin")
-                     (setf *strip* t)
-                     (push (list :name (first (getf elem :body))
-                                 :attrs (getf elem :attrs))
-                           contexts)
-                     (push (list) stack))
-                    ((equal (getf elem :name) "end")
-                     (setf *strip* nil)
-                     (let ((current (pop contexts))
-                           (stack-frame (pop stack)))
-                       (assert (equal (getf current :name)
-                                      (first (getf elem :body))))
-                       (push-to-stack
-                        (list :name (getf current :name)
-                              :attrs (getf current :attrs)
-                              :body stack-frame))))
-                    (t
-                     (push-to-stack elem)))))))
-           (first stack))))))
+         (transform-multiple-blocks ast)))))
 
 (defun ast-to-plump-sexp (ast)
   "Take an AST S-exp and turn it into a format plump-sexp likes."
