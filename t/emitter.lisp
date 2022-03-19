@@ -46,6 +46,11 @@ para3
 test
 @end(code)"))
 
+(test code-block-2
+      (emit-identity "@begin(code)
+test
+@end(code)"))
+
 (test quotes
   (emit-identity "@q(test)")
   (emit-identity "@begin(quote)

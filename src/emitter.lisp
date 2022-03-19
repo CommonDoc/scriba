@@ -118,8 +118,12 @@
   (trivial-tag node stream))
 
 (defmethod emit ((node code-block) stream)
-  (with-block-tag (node stream :extra-attrs (list (cons "lang" (language node))))
-    (emit-children node stream)))
+  (let* ((lang (language node))
+         (extra-args (when (and lang
+                                (not (string= lang "")))
+                       (list (cons "lang" lang)))))
+    (with-block-tag (node stream :extra-attrs extra-args)
+      (emit-children node stream))))
 
 (defmethod emit ((node inline-quote) stream)
   (with-tag (node stream)
